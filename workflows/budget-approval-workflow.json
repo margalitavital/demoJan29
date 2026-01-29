@@ -1,0 +1,300 @@
+{
+  "name": "Budget Approval Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "budget-approval",
+        "responseMode": "responseNode",
+        "onError": "continueRegularOutput"
+      },
+      "id": "webhook-trigger",
+      "name": "Budget Approval Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [240, 300],
+      "webhookId": "budget-approval"
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@company.com",
+        "toEmail": "finance-team@company.com",
+        "subject": "=Budget Approval Request - {{ $json.budgetName }}",
+        "message": "=Dear Finance Team,\n\nA new budget approval request has been submitted:\n\n**Budget Details:**\n- Budget Name: {{ $json.budgetName }}\n- Contract: {{ $json.contractTitle }}\n- Current Target Amount: {{ $json.currentTargetAmount }} {{ $json.currency }}\n- Proposed Target Amount: {{ $json.proposedTargetAmount }} {{ $json.currency }}\n- Reason: {{ $json.reason }}\n- Requested by: {{ $json.requestedBy }}\n- Request Date: {{ $json.requestDate }}\n\n**Action Required:**\nPlease review and approve/reject this request by clicking one of the links below:\n\n✅ **Approve:** {{ $json.approveUrl }}\n❌ **Reject:** {{ $json.rejectUrl }}\n\nBest regards,\nPurchase Contract Management System",
+        "operation": "send",
+        "onError": "continueRegularOutput"
+      },
+      "id": "send-approval-email",
+      "name": "Send Approval Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.callbackUrl }}",
+        "method": "POST",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonParameters": true,
+        "parameters": {
+          "requestId": "={{ $json.requestId }}",
+          "status": "EmailSent",
+          "message": "Approval request email sent to finance team"
+        },
+        "onError": "continueRegularOutput"
+      },
+      "id": "update-request-status",
+      "name": "Update Request Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Budget approval request has been sent to the finance team\",\n  \"requestId\": \"{{ $json.requestId }}\"\n}"
+      },
+      "id": "respond-success",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "=budget-approval/approve/{{ $('Budget Approval Request').item.json.requestId }}",
+        "responseMode": "responseNode",
+        "onError": "continueRegularOutput"
+      },
+      "id": "approval-webhook",
+      "name": "Approval Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [240, 520],
+      "webhookId": "budget-approval-approve"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Budget Approval Request').item.json.callbackUrl }}",
+        "method": "POST",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonParameters": true,
+        "parameters": {
+          "requestId": "={{ $('Budget Approval Request').item.json.requestId }}",
+          "status": "Approved",
+          "approvedBy": "Finance Team",
+          "approvedDate": "={{ new Date().toISOString() }}",
+          "newTargetAmount": "={{ $('Budget Approval Request').item.json.proposedTargetAmount }}"
+        },
+        "onError": "continueRegularOutput"
+      },
+      "id": "approve-request",
+      "name": "Approve Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [460, 520]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@company.com",
+        "toEmail": "={{ $('Budget Approval Request').item.json.requestedBy }}",
+        "subject": "=Budget Request Approved - {{ $('Budget Approval Request').item.json.budgetName }}",
+        "message": "=Dear Requester,\n\nYour budget approval request has been **APPROVED**.\n\n**Approved Changes:**\n- Budget Name: {{ $('Budget Approval Request').item.json.budgetName }}\n- Contract: {{ $('Budget Approval Request').item.json.contractTitle }}\n- Previous Target Amount: {{ $('Budget Approval Request').item.json.currentTargetAmount }} {{ $('Budget Approval Request').item.json.currency }}\n- New Target Amount: {{ $('Budget Approval Request').item.json.proposedTargetAmount }} {{ $('Budget Approval Request').item.json.currency }}\n- Approved by: Finance Team\n- Approved on: {{ new Date().toLocaleDateString() }}\n\nThe budget target amount has been updated in the system.\n\nBest regards,\nPurchase Contract Management System",
+        "operation": "send",
+        "onError": "continueRegularOutput"
+      },
+      "id": "send-approval-confirmation",
+      "name": "Send Approval Confirmation",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [680, 520]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "✅ Budget request has been approved successfully! The target amount has been updated and the requester has been notified."
+      },
+      "id": "respond-approved",
+      "name": "Respond Approved",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [900, 520]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "=budget-approval/reject/{{ $('Budget Approval Request').item.json.requestId }}",
+        "responseMode": "responseNode",
+        "onError": "continueRegularOutput"
+      },
+      "id": "rejection-webhook",
+      "name": "Rejection Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [240, 740],
+      "webhookId": "budget-approval-reject"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Budget Approval Request').item.json.callbackUrl }}",
+        "method": "POST",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonParameters": true,
+        "parameters": {
+          "requestId": "={{ $('Budget Approval Request').item.json.requestId }}",
+          "status": "Rejected",
+          "approvedBy": "Finance Team",
+          "approvedDate": "={{ new Date().toISOString() }}"
+        },
+        "onError": "continueRegularOutput"
+      },
+      "id": "reject-request",
+      "name": "Reject Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [460, 740]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@company.com",
+        "toEmail": "={{ $('Budget Approval Request').item.json.requestedBy }}",
+        "subject": "=Budget Request Rejected - {{ $('Budget Approval Request').item.json.budgetName }}",
+        "message": "=Dear Requester,\n\nYour budget approval request has been **REJECTED**.\n\n**Request Details:**\n- Budget Name: {{ $('Budget Approval Request').item.json.budgetName }}\n- Contract: {{ $('Budget Approval Request').item.json.contractTitle }}\n- Current Target Amount: {{ $('Budget Approval Request').item.json.currentTargetAmount }} {{ $('Budget Approval Request').item.json.currency }}\n- Requested Target Amount: {{ $('Budget Approval Request').item.json.proposedTargetAmount }} {{ $('Budget Approval Request').item.json.currency }}\n- Reason for Request: {{ $('Budget Approval Request').item.json.reason }}\n- Rejected by: Finance Team\n- Rejected on: {{ new Date().toLocaleDateString() }}\n\nThe budget target amount remains unchanged. Please contact the finance team if you need clarification on this decision.\n\nBest regards,\nPurchase Contract Management System",
+        "operation": "send",
+        "onError": "continueRegularOutput"
+      },
+      "id": "send-rejection-notification",
+      "name": "Send Rejection Notification",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [680, 740]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "❌ Budget request has been rejected. The requester has been notified."
+      },
+      "id": "respond-rejected",
+      "name": "Respond Rejected",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [900, 740]
+    }
+  ],
+  "connections": {
+    "Budget Approval Request": {
+      "main": [
+        [
+          {
+            "node": "Send Approval Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Approval Email": {
+      "main": [
+        [
+          {
+            "node": "Update Request Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Request Status": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approval Webhook": {
+      "main": [
+        [
+          {
+            "node": "Approve Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approve Request": {
+      "main": [
+        [
+          {
+            "node": "Send Approval Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Approval Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Respond Approved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rejection Webhook": {
+      "main": [
+        [
+          {
+            "node": "Reject Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reject Request": {
+      "main": [
+        [
+          {
+            "node": "Send Rejection Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Rejection Notification": {
+      "main": [
+        [
+          {
+            "node": "Respond Rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "budget-approval-workflow"
+  },
+  "id": "budget-approval-workflow",
+  "tags": []
+}

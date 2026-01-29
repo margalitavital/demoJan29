@@ -1,0 +1,6 @@
+ID;requestDate;currentTargetAmount;Currency_code;proposedTargetAmount;reason;status;approvedBy;approvedDate;budget_ID
+5d080fe5-184c-40d0-b368-430c661be663;2024-01-20T09:30:00Z;250000;USD;300000;Additional software modules required for expanded user base;Approved;John Smith;2024-01-22T14:15:00Z;c731898c-8e06-4f83-91f0-1ed05b3dd149
+60935597-ced1-4729-8724-691482ec82df;2024-02-15T11:45:00Z;75000;USD;95000;Need additional ergonomic workstations for new hires;Pending;;;f2e0033f-7b44-443c-a0fc-1201570f6512
+a83b138a-0633-40bf-80c7-96452cdb56b7;2024-03-10T08:20:00Z;150000;GBP;175000;Material price increase due to supply chain constraints;Rejected;Sarah Johnson;2024-03-12T16:30:00Z;22294a05-dbae-4940-80d6-5f0ade9cf2a6
+cd40297d-6b34-4704-9ccd-5b03018b08cf;2024-03-25T14:00:00Z;180000;USD;220000;Scaling up cloud resources for peak season demand;Approved;Michael Brown;2024-03-26T10:45:00Z;b649b16c-0628-44f8-a5c0-535f187eed25
+60833697-4937-49b9-8863-7000a7ac8705;2024-04-05T10:30:00Z;95000;EUR;115000;Quality upgrade to premium components for better reliability;Pending;;;9e0287d9-39b2-438c-98ce-f151d13b874b

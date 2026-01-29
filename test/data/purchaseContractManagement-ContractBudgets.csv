@@ -1,0 +1,6 @@
+ID;budgetName;targetAmount;Currency_code;spentAmount;contract_ID
+c731898c-8e06-4f83-91f0-1ed05b3dd149;Software Licenses Q1-Q2;250000;USD;185000;897ca89c-d181-4a93-aa6c-74a0ebe0a3bc
+f2e0033f-7b44-443c-a0fc-1201570f6512;Office Furniture & Equipment;75000;USD;42500;9c1a4477-d401-49da-80fb-b91925acdb68
+22294a05-dbae-4940-80d6-5f0ade9cf2a6;Raw Materials Production;150000;GBP;98750;3c6483e9-fbd6-4343-bac9-614119e5def5
+b649b16c-0628-44f8-a5c0-535f187eed25;Cloud Infrastructure Services;180000;USD;135000;54161958-3c4d-4e67-81c9-d7b48df3378f
+9e0287d9-39b2-438c-98ce-f151d13b874b;Electronic Components Batch 1;95000;EUR;67300;44d03b8e-2c58-4e5a-8d52-7d21ea6680f0
